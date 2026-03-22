@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Log Investigator — Trợ Lý Chẩn Đoán Sự Cố Thông Minh</title>
+    <title>AI Log Investigator — Deep Incident Analysis Platform</title>
+    <meta name="description"
+        content="AI-powered log analysis platform with RAG knowledge retrieval, automated tool execution and incident diagnosis.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -50,7 +52,7 @@
             padding: 1.5rem 2rem;
         }
 
-        /* --- Header --- */
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -114,7 +116,7 @@
             box-shadow: 0 0 10px var(--success);
         }
 
-        /* --- Control Center --- */
+        /* Controls */
         .controls {
             display: grid;
             grid-template-columns: 1fr 1.8fr;
@@ -210,7 +212,7 @@
             box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
         }
 
-        /* --- Loading Steps --- */
+        /* Pipeline */
         .pipeline {
             display: none;
             margin-bottom: 2.5rem;
@@ -279,7 +281,7 @@
             text-align: center;
         }
 
-        /* --- Main Dashboard --- */
+        /* Dashboard */
         .dashboard {
             display: none;
             grid-template-columns: 1fr 400px;
@@ -313,11 +315,20 @@
             gap: 10px;
         }
 
+        .card-h .subtitle {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: none;
+            letter-spacing: 0;
+            margin-top: 4px;
+        }
+
         .card-b {
             padding: 2rem;
         }
 
-        /* --- Diagnosis Section --- */
+        /* Diagnosis */
         .diagnosis-box {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.05));
             border: 1px solid rgba(139, 92, 246, 0.2);
@@ -352,7 +363,7 @@
             margin-top: 8px;
         }
 
-        /* --- Stats grid --- */
+        /* Stats */
         .stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -382,14 +393,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- Explanatory Elements --- */
-        .explanation {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-top: 4px;
-            font-style: italic;
-        }
-
+        /* Clusters */
         .cluster-item {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border);
@@ -442,9 +446,10 @@
             border-radius: 8px;
             color: #9ca3af;
             overflow-x: auto;
+            margin-top: 6px;
         }
 
-        /* --- Service Breakdown --- */
+        /* Service Breakdown */
         .svc-bar-row {
             display: flex;
             align-items: center;
@@ -481,20 +486,7 @@
             color: var(--text-dim);
         }
 
-        /* --- Animation --- */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* --- Action item --- */
+        /* Actions */
         .action-card {
             display: flex;
             gap: 15px;
@@ -547,12 +539,114 @@
             margin-top: 8px;
             white-space: pre-wrap;
         }
+
+        /* Evidence */
+        .ev-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: #d1d5db;
+            background: #000;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border-left: 3px solid var(--secondary);
+            overflow-x: auto;
+        }
+
+        /* RAG */
+        .rag-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* Action Plan */
+        .ac-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .ac-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .ac-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .ac-pri {
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+
+        .ac-meta {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+        }
+
+        .ac-cmd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            background: #000;
+            padding: 6px 10px;
+            border-radius: 6px;
+            color: var(--secondary);
+            margin-top: 6px;
+        }
+
+        /* Parsing Failures */
+        .fail-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media(max-width:1100px) {
+
+            .controls,
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <!-- Header -->
         <header>
             <div class="logo">
                 <div class="logo-box">
@@ -567,19 +661,19 @@
                 </div>
                 <div>
                     <h1>AI Log Investigator</h1>
-                    <p>Hệ thống hỗ trợ chẩn đoán sự cố cho người dùng</p>
+                    <p>Deep Incident Analysis Platform</p>
                 </div>
             </div>
             <div class="status" id="be-status">
                 <div class="status-dot"></div>
-                <span id="be-msg">Đang kết nối Backend...</span>
+                <span id="be-msg">Connecting...</span>
             </div>
         </header>
 
         <!-- Controls -->
         <div class="controls">
-            <div class="card-inp">
-                <label class="label">1. CHỌN FILE LOG HỆ THỐNG</label>
+            <div class="card-inp" title="Select a .log or .txt file to begin analysis">
+                <label class="label">1. Upload Log File</label>
                 <div class="drop-zone" id="dropzone">
                     <input type="file" id="fi" accept=".log,.txt">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
@@ -588,21 +682,21 @@
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    <p style="margin-top: 0.5rem; font-weight: 700;">Nhấn hoặc kéo file vào đây</p>
+                    <p style="margin-top: 0.5rem; font-weight: 700;">Drag & drop .log or .txt file here</p>
                     <p id="fn" style="font-size: 0.8rem; color: var(--success); margin-top: 4px; font-weight: 800;"></p>
                 </div>
             </div>
-            <div class="card-inp">
-                <label class="label">2. BẠN MUỐN AI TRẬP TRUNG VÀO ĐIỀU GÌ? (KHÔNG BẮT BUỘC)</label>
+            <div class="card-inp" title="Provide context or constraints for the AI investigation">
+                <label class="label">2. Investigation Query (Optional)</label>
                 <textarea id="query-text"
-                    placeholder="Ví dụ: 'Tại sao khách hàng không đăng nhập được?' hoặc 'Kiểm tra xem hệ thống có bị quá tải không'..."></textarea>
+                    placeholder="e.g. 'Analyze first 100 lines only'&#10;e.g. 'Focus on AJP connectivity issues'"></textarea>
             </div>
             <button class="btn-go" id="btn-go">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                YÊU CẦU AI PHÂN TÍCH NGAY
+                START AI INVESTIGATION
             </button>
         </div>
 
@@ -611,27 +705,27 @@
             <div class="steps">
                 <div class="step" id="s1">
                     <div class="step-dot">1</div>
-                    <div class="step-lbl">Đọc Log</div>
+                    <div class="step-lbl">Parsing</div>
                 </div>
                 <div class="step" id="s2">
                     <div class="step-dot">2</div>
-                    <div class="step-lbl">Phân Loại Lỗi</div>
+                    <div class="step-lbl">Clustering</div>
                 </div>
                 <div class="step" id="s3">
                     <div class="step-dot">3</div>
-                    <div class="step-lbl">Tra Kiến Thức</div>
+                    <div class="step-lbl">RAG Retrieval</div>
                 </div>
                 <div class="step" id="s4">
                     <div class="step-dot">4</div>
-                    <div class="step-lbl">Lập Kế Hoạch</div>
+                    <div class="step-lbl">Action Plan</div>
                 </div>
                 <div class="step" id="s5">
                     <div class="step-dot">5</div>
-                    <div class="step-lbl">Chạy Công Cụ</div>
+                    <div class="step-lbl">Tool Execution</div>
                 </div>
                 <div class="step" id="s6">
                     <div class="step-dot">6</div>
-                    <div class="step-lbl">Kết Luận</div>
+                    <div class="step-lbl">Diagnosis</div>
                 </div>
             </div>
         </div>
@@ -639,13 +733,15 @@
         <!-- Dashboard -->
         <div class="dashboard" id="db">
             <div class="main-col">
-                <!-- Final Result -->
+                <!-- Diagnosis -->
                 <div class="card diagnosis-box">
                     <div class="card-h">
-                        <h3>👨‍⚕️ KẾT LUẬN CỦA BÁC SĨ AI</h3>
+                        <div>
+                            <h3>🔬 Final Diagnosis</h3>
+                            <div class="subtitle">Comprehensive AI-driven conclusion after all investigative steps</div>
+                        </div>
                         <span id="sev-tag"
-                            style="background:var(--danger); padding:4px 12px; border-radius:100px; font-size:0.7rem; font-weight:800;">NGHIÊM
-                            TRỌNG</span>
+                            style="background:var(--danger); padding:4px 12px; border-radius:100px; font-size:0.7rem; font-weight:800;">CRITICAL</span>
                     </div>
                     <div class="card-b">
                         <div class="final-summary" id="final-sum"></div>
@@ -655,38 +751,80 @@
 
                 <!-- Stats -->
                 <div class="stats">
-                    <div class="stat-card">
+                    <div class="stat-card" title="Total number of log entries including unparseable lines">
                         <div class="stat-v" id="st-total">0</div>
-                        <div class="stat-l">Dòng Log Đã Đọc</div>
+                        <div class="stat-l">Total Lines</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" title="Count of entries identified with ERROR severity">
                         <div class="stat-v" style="color:var(--danger)" id="st-err">0</div>
-                        <div class="stat-l">Lỗi Nghiêm Trọng</div>
+                        <div class="stat-l">Critical Errors</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" title="Number of unique incident patterns identified">
                         <div class="stat-v" id="st-cl">0</div>
-                        <div class="stat-l">Nhóm Vấn Đề</div>
+                        <div class="stat-l">Issue Clusters</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" title="Overall system state based on incident density">
                         <div class="stat-v" style="color:var(--secondary)" id="st-sev">---</div>
-                        <div class="stat-l">Mức Độ Rủi Ro</div>
+                        <div class="stat-l">Severity Level</div>
                     </div>
+                </div>
+
+                <!-- Action Plan -->
+                <div class="card">
+                    <div class="card-h">
+                        <div>
+                            <h3>� AI-Generated Action Plan</h3>
+                            <div class="subtitle">Recommended forensic tools to verify the root cause</div>
+                        </div>
+                    </div>
+                    <div class="card-b" id="ac-box"></div>
+                </div>
+
+                <!-- Executed Actions -->
+                <div class="card">
+                    <div class="card-h">
+                        <div>
+                            <h3>⚡ Tool Execution Results</h3>
+                            <div class="subtitle">Live output from triggered diagnostic scripts</div>
+                        </div>
+                        <span id="ex-cnt"
+                            style="font-size:0.7rem; font-weight:800; background:rgba(16,185,129,0.15); color:var(--success); padding:3px 10px; border-radius:100px;">0
+                            TOOLS</span>
+                    </div>
+                    <div class="card-b" id="action-box"></div>
                 </div>
 
                 <!-- Clusters -->
                 <div class="card">
                     <div class="card-h">
-                        <h3>🔍 CHI TIẾT CÁC NHÓM VẤN ĐỀ PHÁT HIỆN</h3>
+                        <div>
+                            <h3>📊 Incident Clustering</h3>
+                            <div class="subtitle">Algorithmic grouping of logs by structural similarity</div>
+                        </div>
                     </div>
                     <div class="card-b" id="cluster-box"></div>
                 </div>
 
-                <!-- Actions -->
+                <!-- Evidence -->
                 <div class="card">
                     <div class="card-h">
-                        <h3>🛠 HÀNH ĐỘNG AI ĐÃ THỰC HIỆN ĐỂ KIỂM CHỨNG</h3>
+                        <div>
+                            <h3>🔍 Raw Log Evidence</h3>
+                            <div class="subtitle">Key snapshots from the source log used for analysis</div>
+                        </div>
                     </div>
-                    <div class="card-b" id="action-box"></div>
+                    <div class="card-b" id="ev-box"></div>
+                </div>
+
+                <!-- Parsing Failures -->
+                <div class="card" id="fail-card" style="display:none">
+                    <div class="card-h">
+                        <div>
+                            <h3>❌ Parsing Failures</h3>
+                            <div class="subtitle">Lines that did not match standard log formats</div>
+                        </div>
+                    </div>
+                    <div class="card-b" id="fail-box"></div>
                 </div>
             </div>
 
@@ -694,14 +832,20 @@
             <div class="side-col">
                 <div class="card">
                     <div class="card-h">
-                        <h3>📡 BẢN ĐỒ SERVICE</h3>
+                        <div>
+                            <h3>📡 Service Breakdown</h3>
+                            <div class="subtitle">Distribution of logs across system modules</div>
+                        </div>
                     </div>
                     <div class="card-b" id="svc-box"></div>
                 </div>
 
                 <div class="card" style="border-left: 4px solid var(--danger);">
                     <div class="card-h">
-                        <h3>📍 NGUYÊN NHÂN CHÍNH</h3>
+                        <div>
+                            <h3>⚠ Probable Causes</h3>
+                            <div class="subtitle">Most likely triggers for the observed errors</div>
+                        </div>
                     </div>
                     <div class="card-b">
                         <ul id="cause-list" style="padding-left:15px; font-size:0.9rem;"></ul>
@@ -710,18 +854,26 @@
 
                 <div class="card" style="border-left: 4px solid var(--success);">
                     <div class="card-h">
-                        <h3>💡 ĐỀ XUẤT CẦN LÀM NGAY</h3>
+                        <div>
+                            <h3>✅ System Recommendations</h3>
+                            <div class="subtitle">Next steps for remediation and prevention</div>
+                        </div>
                     </div>
                     <div class="card-b">
                         <ul id="rec-list" style="padding-left:15px; font-size:0.9rem;"></ul>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" style="border-left: 4px solid var(--secondary);">
                     <div class="card-h">
-                        <h3>📖 KIẾN THỨC TRA ĐƯỢC</h3>
+                        <div>
+                            <h3>📚 RAG Knowledge Base</h3>
+                            <div class="subtitle">Relevant matches from technical documentation</div>
+                        </div>
+                        <span id="rag-cnt"
+                            style="font-size:0.65rem; font-weight:800; background:rgba(59,130,246,0.15); color:var(--info); padding:3px 8px; border-radius:100px;">0</span>
                     </div>
-                    <div class="card-b" id="rag-box" style="font-size:0.8rem; color:var(--text-dim);"></div>
+                    <div class="card-b" id="rag-box"></div>
                 </div>
             </div>
         </div>
@@ -729,32 +881,17 @@
 
     <script>
         const API = 'http://127.0.0.1:8000';
-        const DICT = {
-            'jk2_init': 'Hệ thống Khởi động (Startup)',
-            'workerEnv': 'Môi trường xử lý Backend',
-            'mod_jk': 'Cầu nối Apache-Tomcat (Connector)',
-            'client_request': 'Lưu lượng Truy cập Người dùng',
-            'apache': 'Máy chủ Web (Apache Server)',
-            'mod_jk workerEnv error state': 'Lỗi mất kết nối hoàn toàn với Backend',
-            'Directory access forbidden': 'Lỗi thiếu quyền truy cập file',
-            'Apache scoreboard child mismatch': 'Lỗi đồng bộ bộ nhớ tiến trình',
-            'Apache child initialization issue': 'Lỗi khởi tạo trình xử lý phụ',
-            'Other apache issue': 'Lỗi hệ thống Web Server khác',
-            'HIGH': 'CAO (Cần xử lý ngay)',
-            'MEDIUM': 'TRUNG BÌNH',
-            'LOW': 'THẤP'
-        };
 
         async function ch() {
             try {
                 const r = await fetch(`${API}/health`);
                 if (r.ok) {
                     document.getElementById('be-status').classList.add('online');
-                    document.getElementById('be-msg').innerText = 'HỆ THỐNG SẴN SÀNG';
+                    document.getElementById('be-msg').innerText = 'SYSTEM ONLINE';
                 }
             } catch {
                 document.getElementById('be-status').classList.remove('online');
-                document.getElementById('be-msg').innerText = 'Backend đang tắt';
+                document.getElementById('be-msg').innerText = 'BACKEND OFFLINE';
             }
         }
         setInterval(ch, 3000); ch();
@@ -765,17 +902,19 @@
 
         document.getElementById('btn-go').addEventListener('click', async () => {
             const f = document.getElementById('fi').files[0];
-            if (!f) return alert('Hãy chọn file log!');
+            if (!f) return alert('Please select a log file first.');
 
             document.getElementById('db').style.display = 'none';
             document.getElementById('pip').style.display = 'block';
 
-            let s = 1;
+            let s = 0;
+            document.getElementById('s1').classList.add('active');
             const iv = setInterval(() => {
+                s++;
                 if (s <= 5) {
                     document.getElementById('s' + s).classList.add('done');
-                    s++;
-                    document.getElementById('s' + s).classList.add('active');
+                    document.getElementById('s' + s).classList.remove('active');
+                    document.getElementById('s' + (s + 1)).classList.add('active');
                 } else { clearInterval(iv); }
             }, 600);
 
@@ -785,94 +924,124 @@
 
             try {
                 const r = await fetch(`${API}/analyze-log`, { method: 'POST', body: fd });
+                if (!r.ok) throw new Error('Analysis failed (HTTP ' + r.status + ')');
                 const d = await r.json();
 
                 clearInterval(iv);
-                document.querySelectorAll('.step').forEach(e => e.classList.add('done'));
+                document.querySelectorAll('.step').forEach(e => { e.classList.remove('active'); e.classList.add('done'); });
                 setTimeout(() => {
                     document.getElementById('pip').style.display = 'none';
                     render(d.result);
                 }, 800);
             } catch (err) {
-                alert('Có lỗi: ' + err.message);
+                clearInterval(iv);
                 document.getElementById('pip').style.display = 'none';
+                alert('Error: ' + err.message + '\nMake sure the backend (uvicorn) is running.');
             }
         });
 
+        function esc(s) { const d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+
         function render(res) {
             document.getElementById('db').style.display = 'grid';
+            window.scrollTo({ top: document.getElementById('db').offsetTop - 20, behavior: 'smooth' });
 
-            // Stats
             document.getElementById('st-total').innerText = res.overview.total_lines;
             document.getElementById('st-err').innerText = res.overview.error_count;
             document.getElementById('st-cl').innerText = res.clusters.length;
-            document.getElementById('st-sev').innerText = DICT[res.severity] || res.severity;
+            const sev = res.severity;
+            document.getElementById('st-sev').innerText = sev;
+            document.getElementById('st-sev').style.color = sev === 'HIGH' ? 'var(--danger)' : sev === 'MEDIUM' ? 'var(--warning)' : 'var(--success)';
+            document.getElementById('sev-tag').innerText = sev;
+            document.getElementById('sev-tag').style.background = sev === 'HIGH' ? 'var(--danger)' : sev === 'MEDIUM' ? 'var(--warning)' : 'var(--success)';
 
-            // Diagnosis
-            document.getElementById('sev-tag').innerText = DICT[res.severity] || res.severity;
             document.getElementById('final-sum').innerText = res.final_summary || res.summary;
             const dl = document.getElementById('diag-list'); dl.innerHTML = '';
             (res.final_diagnosis || []).forEach(d => {
-                dl.innerHTML += `<li><div class="diag-icon"></div><span>${d}</span></li>`;
+                dl.innerHTML += `<li><div class="diag-icon"></div><span>${esc(d)}</span></li>`;
             });
 
-            // Service Breakdown
+            const svcNames = {
+                'jk2_init': 'Core System Boot',
+                'workerEnv': 'Backend Environment',
+                'mod_jk': 'Data Connector (mod_jk)',
+                'unknown-service': 'Standard System Log'
+            };
+
             const sb = document.getElementById('svc-box'); sb.innerHTML = '';
-            const services = res.overview.top_services;
-            const max = Math.max(...Object.values(services), 1);
-            Object.entries(services).forEach(([k, v]) => {
-                const name = DICT[k] || k;
-                const per = (v / max * 100);
-                sb.innerHTML += `
-                    <div class="svc-bar-row">
-                        <div class="svc-name">${name}</div>
-                        <div class="svc-progress-bg"><div class="svc-progress-fill" style="width:${per}%"></div></div>
-                        <div class="svc-val">${v}</div>
-                    </div>
-                `;
+            const svcs = res.overview.top_services || {};
+            const mx = Math.max(...Object.values(svcs), 1);
+            Object.entries(svcs).forEach(([k, v]) => {
+                const label = svcNames[k] || k;
+                sb.innerHTML += `<div class="svc-bar-row"><div class="svc-name">${esc(label)}</div><div class="svc-progress-bg"><div class="svc-progress-fill" style="width:${(v / mx * 100)}%"></div></div><div class="svc-val">${v}</div></div>`;
             });
 
-            // Clusters
             const cb = document.getElementById('cluster-box'); cb.innerHTML = '';
             res.clusters.forEach(c => {
-                const name = DICT[c.label] || c.label;
                 cb.innerHTML += `
                     <div class="cluster-item">
                         <div class="cluster-name">
-                            <span class="c-title">${name}</span>
-                            <span class="c-count">${c.count} lỗi</span>
+                            <span class="c-title">${esc(c.label)}</span>
+                            <span class="c-count">${c.count} occurrences</span>
                         </div>
-                        <p class="c-body">${name} xảy ra khi hệ thống gặp vấn đề ở tầng ${DICT[c.services[0]] || c.services[0]}.</p>
-                        <div class="explanation">Ví dụ về dòng lỗi này trong tài liệu:</div>
-                        <div class="c-sample">${c.samples[0]}</div>
-                    </div>
-                `;
+                        <div class="c-body">Services affected: ${(c.services || []).map(s => svcNames[s] || s).join(', ')}</div>
+                        ${(c.samples || []).map(s => `<div class="c-sample">${esc(s)}</div>`).join('')}
+                    </div>`;
             });
 
-            // Executed Actions
-            const ab = document.getElementById('action-box'); ab.innerHTML = '';
-            res.executed_actions.forEach(a => {
+            const ab = document.getElementById('ac-box'); ab.innerHTML = '';
+            (res.action_checks || []).forEach(a => {
                 ab.innerHTML += `
+                    <div class="ac-card">
+                        <div class="ac-top">
+                            <span class="ac-title">${esc(a.title)}</span>
+                            <span class="ac-pri" style="color:${a.priority <= 2 ? 'var(--danger)' : 'var(--warning)'}">P${a.priority}</span>
+                        </div>
+                        <div class="ac-meta">Tool: <strong>${esc(a.tool)}</strong> · Category: ${esc(a.category)}</div>
+                        <div class="ac-meta" style="margin-top:4px">Purpose: ${esc(a.purpose)}</div>
+                        <div class="ac-cmd">$ ${esc(a.command)}</div>
+                    </div>`;
+            });
+
+            const eb = document.getElementById('action-box'); eb.innerHTML = '';
+            const exActs = res.executed_actions || [];
+            document.getElementById('ex-cnt').innerText = exActs.length + ' TOOLS';
+            exActs.forEach(a => {
+                eb.innerHTML += `
                     <div class="action-card">
                         <div class="action-st ${a.success ? 'action-ok' : 'action-fail'}">${a.success ? '✓' : '✗'}</div>
-                        <div class="action-body">
-                            <h4>${a.title}</h4>
-                            <p>Sử dụng công cụ ${a.tool} để kiểm tra.</p>
-                            <div class="action-res">${a.output.substring(0, 200)}${a.output.length > 200 ? '...' : ''}</div>
+                        <div class="action-body" style="flex:1">
+                            <h4>${esc(a.title)}</h4>
+                            <p>${esc(a.tool)}(${esc(JSON.stringify(a.args))}) · ${a.success ? 'Success' : 'Failed'}</p>
+                            <div class="action-res" style="${a.success ? '' : 'color:var(--danger)'}">${esc(a.output)}${a.error ? '\n⚠ ' + esc(a.error) : ''}</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
 
-            // Lists
+            const ev = document.getElementById('ev-box'); ev.innerHTML = '';
+            (res.evidence || []).forEach(e => {
+                ev.innerHTML += `<div class="ev-line">${esc(e)}</div>`;
+            });
+
+            const fb = document.getElementById('fail-box'); fb.innerHTML = '';
+            const fails = res.overview.failed_lines_content || [];
+            if (fails.length > 0) {
+                document.getElementById('fail-card').style.display = 'block';
+                fails.forEach(l => fb.innerHTML += `<div class="fail-line">${esc(l)}</div>`);
+            } else {
+                document.getElementById('fail-card').style.display = 'none';
+            }
+
             const cl = document.getElementById('cause-list'); cl.innerHTML = '';
-            res.probable_causes.forEach(c => cl.innerHTML += `<li style="margin-bottom:8px;">${c}</li>`);
+            (res.probable_causes || []).forEach(c => cl.innerHTML += `<li style="margin-bottom:8px;">${esc(c)}</li>`);
 
             const rl = document.getElementById('rec-list'); rl.innerHTML = '';
-            res.recommendations.forEach(r => rl.innerHTML += `<li style="margin-bottom:8px;">${r}</li>`);
+            (res.recommendations || []).forEach(r => rl.innerHTML += `<li style="margin-bottom:8px;">${esc(r)}</li>`);
 
             const rb = document.getElementById('rag-box'); rb.innerHTML = '';
-            res.retrieved_knowledge.forEach(k => rb.innerHTML += `<div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:10px;">${k}</div>`);
+            const rags = res.retrieved_knowledge || [];
+            document.getElementById('rag-cnt').innerText = rags.length;
+            rags.forEach(k => rb.innerHTML += `<div class="rag-card">${esc(k)}</div>`);
         }
     </script>
 </body>

@@ -51,6 +51,7 @@ def build_overview(records: List[LogRecord], failed_lines: List[str]) -> Overvie
         total_lines=len(records) + len(failed_lines),
         parsed_lines=len(records),
         failed_lines=len(failed_lines),
+        failed_lines_content=failed_lines[:50],  # Limit to 50 for performance
         info_count=level_counter.get("INFO", 0),
         warn_count=level_counter.get("WARN", 0),
         error_count=level_counter.get("ERROR", 0),
@@ -93,33 +94,33 @@ def derive_probable_causes(clusters):
 
     if "mod_jk workerEnv error state" in labels:
         causes.append(
-            "Nhiều khả năng backend worker/Tomcat không phản hồi, timeout, hoặc không accept kết nối từ Apache."
+            "It is highly likely that the backend worker or Tomcat is not responding, timing out, or not accepting connections from Apache."
         )
         causes.append(
-            "Có thể kết nối Apache tới backend qua AJP bị lỗi hoặc cổng backend không mở đúng."
+            "The AJP connection between Apache and the backend might be failing, or the backend port is not correctly open."
         )
         causes.append(
-            "Cấu hình workers2.properties có thể liên quan, nhưng nên kiểm tra sau khi đã xác nhận backend và kết nối."
+            "Configuration issues in workers2.properties could be related, but should be checked after confirming backend connectivity."
         )
 
     if "Apache scoreboard child mismatch" in labels:
         causes.append(
-            "Có dấu hiệu Apache hoặc jk2 đang gặp vấn đề đồng bộ trạng thái child process trong scoreboard."
+            "There are signs that Apache or jk2 is having issues synchronizing child process states within the scoreboard."
         )
 
     if "Apache child initialization issue" in labels:
         causes.append(
-            "Có thể quá trình khởi tạo child process/mod_jk gặp lỗi khi backend chưa sẵn sàng."
+            "The child process or mod_jk initialization might have failed while the backend was not yet ready."
         )
 
     if "Directory access forbidden" in labels or "Client access forbidden" in labels:
         causes.append(
-            "Có một issue phụ về access control hoặc thiếu index file trong /var/www/html/."
+            "There is a secondary issue regarding access control or a missing index file in /var/www/html/."
         )
 
     if not causes:
         causes.append(
-            "Chưa xác định rõ nguyên nhân chính, cần kiểm tra backend, kết nối AJP và log riêng của mod_jk."
+            "The primary cause is not yet clearly identified; check backend status, AJP connectivity, and mod_jk specific logs."
         )
 
     return causes
@@ -129,27 +130,27 @@ def derive_recommendations(clusters):
 
     if "mod_jk workerEnv error state" in labels:
         recommendations.extend([
-            "Ưu tiên xác nhận backend/Tomcat còn chạy hay không.",
-            "Kiểm tra Apache có kết nối được tới backend qua AJP hay không.",
-            "Kiểm tra cổng AJP của backend có đang mở không.",
-            "Kiểm tra log riêng của mod_jk bằng JkLogFile, ví dụ logs/mod_jk.log.",
-            "Chỉ sau đó mới rà lại workers2.properties hoặc workers.properties.",
+            "Prioritize confirming if backend/Tomcat is still running.",
+            "Verify if Apache can connect to the backend via the AJP port.",
+            "Check if the AJP port on the backend is actually open.",
+            "Inspect the dedicated mod_jk log file (e.g., mod_jk.log or similar).",
+            "Only review workers2.properties or workers.properties after confirming backend health.",
         ])
 
     if "Apache scoreboard child mismatch" in labels:
         recommendations.extend([
-            "Kiểm tra log restart/reload Apache gần thời điểm phát sinh lỗi scoreboard.",
-            "Kiểm tra child process có bị restart bất thường hay không.",
+            "Check for Apache restart or reload events near the time of scoreboard errors.",
+            "Verify if child processes are restarting unexpectedly.",
         ])
 
     if "Apache child initialization issue" in labels:
         recommendations.extend([
-            "Kiểm tra backend có sẵn sàng trước khi Apache chuyển tiếp request hay không.",
+            "Ensure the backend is fully initialized before Apache starts forwarding requests.",
         ])
 
     if "Directory access forbidden" in labels or "Client access forbidden" in labels:
         recommendations.extend([
-            "Xử lý sau: kiểm tra DirectoryIndex, index.html, Require, AllowOverride và .htaccess cho /var/www/html/.",
+            "Secondary task: check DirectoryIndex, index.html, Require, AllowOverride, and .htaccess for /var/www/html/.",
         ])
 
     return list(dict.fromkeys(recommendations))
@@ -173,20 +174,20 @@ def derive_action_checks(clusters):
     if "mod_jk workerEnv error state" in labels:
         checks.extend([
             {
-                "title": "Kiểm tra backend HTTP trực tiếp",
+                "title": "Check Frontend-to-Backend HTTP",
                 "tool": "check_http_endpoint",
                 "args": {
                     "url": "http://localhost:8080",
                     "timeout": 5
                 },
                 "command": "curl http://localhost:8080",
-                "purpose": "Xác nhận Tomcat/backend có phản hồi hay không.",
+                "purpose": "Verify if Tomcat or the backend is responding to HTTP requests.",
                 "priority": 1,
                 "category": "backend_health",
                 "platform": "any",
             },
             {
-                "title": "Kiểm tra cổng AJP của backend",
+                "title": "Check Backend AJP Port",
                 "tool": "check_tcp_port",
                 "args": {
                     "host": "localhost",
@@ -194,44 +195,44 @@ def derive_action_checks(clusters):
                     "timeout": 3
                 },
                 "command": "telnet localhost 8009",
-                "purpose": "Xác nhận Apache có thể mở kết nối tới backend qua AJP hay không.",
+                "purpose": "Confirm if the AJP port is open and accessible from the web server.",
                 "priority": 1,
                 "category": "network_connectivity",
                 "platform": "any",
             },
             {
-                "title": "Đọc log riêng của mod_jk",
+                "title": "Inspect Dedicated mod_jk Logs",
                 "tool": "read_file_tail",
                 "args": {
                     "path": "data/mock_runtime/mod_jk.log",
                     "lines": 80
                 },
                 "command": "tail -n 80 data/mock_runtime/mod_jk.log",
-                "purpose": "Xem log debug chuyên biệt của mod_jk để xác định lỗi kết nối/backend.",
+                "purpose": "Examine specific mod_jk logs for low-level connection errors.",
                 "priority": 2,
                 "category": "log_inspection",
                 "platform": "any",
             },
             {
-                "title": "Rà cấu hình workers2.properties",
+                "title": "Review workers2.properties Config",
                 "tool": "read_file",
                 "args": {
                     "path": "data/mock_runtime/workers2.properties"
                 },
                 "command": "cat data/mock_runtime/workers2.properties",
-                "purpose": "Kiểm tra host, port, route, timeout và mapping sau khi đã xác nhận backend/kết nối.",
+                "purpose": "Check host/port/route mappings in the connector configuration.",
                 "priority": 3,
                 "category": "config_review",
                 "platform": "any",
             },
             {
-                "title": "Kiểm tra port AJP đang listen",
+                "title": "Identify Listening AJP Port",
                 "tool": "run_shell_command",
                 "args": {
                     "command": "netstat -tulnp | grep 8009"
                 },
                 "command": "netstat -tulnp | grep 8009",
-                "purpose": "Xác nhận backend đang mở cổng AJP.",
+                "purpose": "Verify which process is actually listening on the AJP port.",
                 "priority": 3,
                 "category": "port_inspection",
                 "platform": "linux",
@@ -241,14 +242,14 @@ def derive_action_checks(clusters):
     if "Apache scoreboard child mismatch" in labels:
         checks.append(
             {
-                "title": "Kiểm tra restart hoặc reload Apache",
+                "title": "Check Apache Lifecycle Events",
                 "tool": "read_file_tail",
                 "args": {
                     "path": "data/mock_runtime/error_log",
                     "lines": 120
                 },
                 "command": "tail -n 120 data/mock_runtime/error_log",
-                "purpose": "Xác định lỗi scoreboard có liên quan đến restart hoặc reload bất thường hay không.",
+                "purpose": "Determine if scoreboard issues correlate with recent restarts or reloads.",
                 "priority": 2,
                 "category": "log_inspection",
                 "platform": "any",
@@ -258,13 +259,13 @@ def derive_action_checks(clusters):
     if "Apache child initialization issue" in labels:
         checks.append(
             {
-                "title": "Kiểm tra tiến trình backend",
+                "title": "Check Backend Process Status",
                 "tool": "run_shell_command",
                 "args": {
                     "command": "ps aux | grep -i tomcat"
                 },
                 "command": "ps aux | grep -i tomcat",
-                "purpose": "Xác nhận backend đã sẵn sàng trước khi Apache/mod_jk chuyển tiếp request.",
+                "purpose": "Ensure the backend process is running before it accepts traffic.",
                 "priority": 2,
                 "category": "process_inspection",
                 "platform": "linux",
@@ -274,13 +275,13 @@ def derive_action_checks(clusters):
     if "Directory access forbidden" in labels or "Client access forbidden" in labels:
         checks.append(
             {
-                "title": "Kiểm tra file index trong /var/www/html/",
+                "title": "Verify Index Files in WebRoot",
                 "tool": "run_shell_command",
                 "args": {
                     "command": "ls -la /var/www/html/"
                 },
                 "command": "ls -la /var/www/html/",
-                "purpose": "Xác nhận thư mục có index.html hoặc file index phù hợp; đây là issue phụ, xử lý sau.",
+                "purpose": "Confirm existence of index.html; this is a secondary issue.",
                 "priority": 4,
                 "category": "filesystem_check",
                 "platform": "linux",

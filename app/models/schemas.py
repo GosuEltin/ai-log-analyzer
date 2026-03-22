@@ -25,6 +25,7 @@ class Overview(BaseModel):
     warn_count: int
     error_count: int
     top_services: Dict[str, int]
+    failed_lines_content: List[str] = []
 
 
 class ActionCheck(BaseModel):

@@ -53,16 +53,12 @@ def _clean_markdown(text: str) -> str:
 def _clean_diagnosis_lines(lines: list[str]) -> list[str]:
     cleaned = []
     blocked = {
-        "issue chính:",
-        "issue chính",
-        "issue phụ:",
-        "issue phụ",
-        "issue phu:",
-        "issue phu",
-        "chắc chắn:",
-        "chắc chắn",
-        "mức độ chắc chắn:",
-        "mức độ chắc chắn",
+        "primary issue:",
+        "primary issue",
+        "secondary issue:",
+        "secondary issue",
+        "certainty:",
+        "certainty",
         "final diagnosis:",
         "final diagnosis",
     }
@@ -81,35 +77,32 @@ def _clean_diagnosis_lines(lines: list[str]) -> list[str]:
 def generate_incident_summary(payload: dict) -> str:
     if not settings.GROQ_API_KEY:
         return (
-            "Tổng quan: Hệ thống ghi nhận nhiều lỗi, chủ yếu ở mod_jk/workerEnv. "
-            "Lỗi chính: mod_jk workerEnv error state là cụm lỗi chi phối. "
-            "Nguyên nhân khả dĩ: backend không phản hồi hoặc kết nối Apache tới backend qua AJP bị lỗi. "
-            "Hành động ưu tiên: kiểm tra backend, AJP port và mod_jk.log trước, rồi mới rà cấu hình."
+            "Overview: Multiple errors detected, primarily in mod_jk/workerEnv module. "
+            "Primary Issue: mod_jk workerEnv error state is the dominant cluster. "
+            "Probable Cause: Backend unresponsive or AJP connection failure between server and app. "
+            "Priority Action: Verify backend health, AJP port 8009, and mod_jk logs."
         )
 
     prompt = f"""
-Bạn là trợ lý phân tích log Apache có hỗ trợ tài liệu kỹ thuật.
+You are a senior Apache log analysis assistant with technical documentation support.
 
-Dữ liệu phân tích:
+Analysis Data:
 {payload}
 
-Hãy viết báo cáo cực ngắn bằng tiếng Việt, tối đa 160 từ.
-Không dùng markdown, không dùng bảng, không dùng bullet.
-Chỉ trả lời đúng 4 dòng theo mẫu này:
+Write a very short report in English, maximum 160 words.
+Do not use markdown, tables, or bullets.
+Respond strictly in these 4 lines:
 
-Tổng quan: ...
-Lỗi chính: ...
-Nguyên nhân khả dĩ: ...
-Hành động ưu tiên: ...
+Overview: ...
+Primary Issue: ...
+Probable Cause: ...
+Priority Action: ...
 
-Yêu cầu:
-- Phải bám sát user_query nếu có
-- Nếu user_query yêu cầu chỉ tập trung vào backend/Tomcat/AJP, hãy hạ mọi issue khác xuống mức issue phụ
-- Nếu một issue xuất hiện ít hơn rõ rệt so với issue chính, chỉ mô tả nó là issue phụ
-- Ưu tiên issue chính theo tần suất và mức độ ảnh hưởng
-- Nếu có mod_jk workerEnv error state, phải ưu tiên backend/Tomcat, kết nối Apache -> backend, AJP port, rồi mới tới config
-- Ưu tiên dùng retrieved_knowledge khi liên quan
-- Không bịa thông tin
+Requirements:
+- Adhere to user_query if provided.
+- If requested to focus on backend/Tomcat/AJP, downgrade other issues to secondary.
+- Use retrieved_knowledge when applicable.
+- Do not fabricate information.
 """
 
     try:
@@ -130,47 +123,46 @@ Yêu cầu:
 def generate_final_incident_report(payload: dict) -> tuple[str, list[str]]:
     if not settings.GROQ_API_KEY:
         final_summary = (
-            "Sau khi chạy các kiểm tra ưu tiên cao, hệ thống nghi ngờ mạnh rằng backend không phản hồi hoặc kết nối AJP "
-            "giữa Apache và backend đang lỗi; lỗi truy cập thư mục chỉ là issue phụ."
+            "After high-priority checks, results strongly suggest the backend is unresponsive or the AJP connection "
+            "between the web server and backend is failing."
         )
         final_diagnosis = [
-            "Nhiều khả năng backend/Tomcat không phản hồi hoặc chưa lắng nghe trên cổng AJP 8009.",
-            "Các lỗi mod_jk workerEnv và scoreboard phù hợp với tình huống Apache không kết nối được tới backend.",
-            "Issue truy cập thư mục là vấn đề phụ và không phải trọng tâm của điều tra này.",
+            "Highly likely that backend/Tomcat is unresponsive or not listening on AJP port 8009.",
+            "Mod_jk workerEnv and scoreboard errors are consistent with Apache being unable to connect.",
+            "Directory access issues are secondary and not the focus of this incident.",
         ]
         return final_summary, final_diagnosis
 
     prompt = f"""
-Bạn là trợ lý điều tra sự cố backend.
+You are a senior backend incident investigation assistant.
 
-Dữ liệu sau khi đã chạy tool:
+Data after executing diagnostic tools:
 {payload}
 
-Hãy trả lời bằng tiếng Việt theo đúng định dạng này và KHÔNG dùng markdown:
+Reply in English using the following format and DO NOT use markdown:
 
 FINAL_SUMMARY:
-<một đoạn ngắn tối đa 120 từ>
+<a concise paragraph, maximum 120 words>
 
 FINAL_DIAGNOSIS:
-- <mỗi dòng là một kết luận hoàn chỉnh>
-- <không dùng heading như Issue chính, Chắc chắn, Issue phụ>
-- <không dùng markdown đậm>
+- <each line is a complete conclusion>
+- <do not use headings like Primary Issue within the list>
+- <do not use bold markdown>
 
-Yêu cầu:
-- Phải bám sát user_query nếu có
-- Nếu user_query chỉ tập trung vào backend/Tomcat/AJP, không được làm access control thành trọng tâm
-- Dùng tool_results để cập nhật kết luận
-- Phân biệt issue chính và issue phụ ngay trong nội dung câu
-- Phải viết cẩn trọng, tránh khẳng định tuyệt đối nếu bằng chứng chưa đủ
-- Ưu tiên các cụm: "nhiều khả năng", "cho thấy", "củng cố giả thuyết", "phù hợp với tình huống"
-- Không bịa
+Requirements:
+- Adhere closely to user_query if provided.
+- Incorporate tool_results to update conclusions.
+- Distinguish between primary and secondary issues.
+- Be cautious, avoid absolute assertions if evidence is insufficient.
+- Use phrases like: "highly likely", "indicates", "supports the hypothesis".
+- Do not fabricate info.
 """
 
     try:
         response = client.chat.completions.create(
             model=settings.MODEL_NAME,
             messages=[
-                {"role": "system", "content": "Bạn là trợ lý điều tra sự cố backend."},
+                {"role": "system", "content": "You are a senior backend incident investigation assistant."},
                 {"role": "user", "content": prompt},
             ],
             temperature=0.2,

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from fastapi.responses import FileResponse
 import os
+import re
 
 from app.models.schemas import AnalyzeResponse
 from app.services.parser import parse_log_text
@@ -29,6 +30,35 @@ from app.services.investigation_focus import (
 )
 
 router = APIRouter()
+
+
+def _extract_line_limit(query: str) -> int | None:
+    """Extract line limit from user query.
+    
+    Supports patterns like:
+      - Vietnamese: '100 dòng đầu', 'phân tích 50 dòng', '200 dòng đầu tiên'
+      - English:    'first 100 lines', 'top 50 lines', 'analyze 200 lines', 'only 100 lines'
+    """
+    if not query:
+        return None
+    q = query.lower().strip()
+    
+    # Vietnamese patterns: "100 dòng đầu", "phân tích 50 dòng"
+    m = re.search(r'(\d+)\s*dòng', q)
+    if m:
+        return int(m.group(1))
+    
+    # English patterns: "first 100 lines", "top 200 lines", "only 50 lines", "analyze 100 lines"
+    m = re.search(r'(?:first|top|only|analyze|check|scan|read)\s+(\d+)\s+lines', q)
+    if m:
+        return int(m.group(1))
+    
+    # "100 lines" at the start or standalone
+    m = re.search(r'(\d+)\s+lines', q)
+    if m:
+        return int(m.group(1))
+    
+    return None
 
 
 
@@ -61,6 +91,13 @@ async def analyze_log(
 
     # Phase 0: Translate Vietnamese query to English for better AI understanding
     translated_query = translate_query_to_english(user_query)
+
+    # Phase 0.5: Detect line limit from user query
+    # Supports: "first 100 lines", "100 dòng đầu", "top 50 lines", "analyze 200 lines", etc.
+    line_limit = _extract_line_limit(user_query) or _extract_line_limit(translated_query)
+    if line_limit:
+        lines = text.splitlines()
+        text = "\n".join(lines[:line_limit])
 
     # Phase 1: Raw analyze
     records, failed_lines = parse_log_text(text)
