@@ -1,4 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from fastapi.responses import FileResponse
+import os
 
 from app.models.schemas import AnalyzeResponse
 from app.services.parser import parse_log_text
@@ -14,6 +16,7 @@ from app.services.analyzer import (
 from app.services.llm_service import (
     generate_incident_summary,
     generate_final_incident_report,
+    translate_query_to_english,
 )
 from app.services.rag_service import retrieve_knowledge
 from app.services.tool_executor import execute_action_checks
@@ -28,9 +31,13 @@ from app.services.investigation_focus import (
 router = APIRouter()
 
 
+
 @router.get("/")
 def root():
-    return {"message": "AI Log Analyzer is running"}
+    index_path = os.path.join(os.getcwd(), "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "AI Log Analyzer Backend is running, but index.html was not found in root."}
 
 
 @router.get("/health")
@@ -51,6 +58,9 @@ async def analyze_log(
         raise HTTPException(status_code=400, detail="File rỗng.")
 
     text = content.decode("utf-8", errors="ignore")
+
+    # Phase 0: Translate Vietnamese query to English for better AI understanding
+    translated_query = translate_query_to_english(user_query)
 
     # Phase 1: Raw analyze
     records, failed_lines = parse_log_text(text)
@@ -83,13 +93,13 @@ async def analyze_log(
         cluster_labels=cluster_labels,
         probable_causes=probable_causes,
         evidence=evidence,
-        user_query=user_query,
+        user_query=translated_query,
         top_k=4,
     )
 
     # Phase 4: Initial reasoning
     summary_payload = {
-        "user_query": user_query,
+        "user_query": translated_query,
         "focus_mode": focus_mode,
         "primary_issue": primary_issue,
         "secondary_issues": secondary_issues,
@@ -110,7 +120,7 @@ async def analyze_log(
 
     # Phase 6: Final reasoning with tool results
     final_payload = {
-        "user_query": user_query,
+        "user_query": translated_query,
         "focus_mode": focus_mode,
         "primary_issue": primary_issue,
         "secondary_issues": secondary_issues,

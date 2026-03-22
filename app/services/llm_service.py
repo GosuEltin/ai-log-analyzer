@@ -8,6 +8,41 @@ client = OpenAI(
 )
 
 
+def translate_query_to_english(user_query: str) -> str:
+    """Translate Vietnamese user query to English so the AI model understands it better."""
+    if not user_query or not user_query.strip():
+        return user_query
+
+    # Quick check: if it looks like pure ASCII (English), skip translation
+    non_ascii = sum(1 for c in user_query if ord(c) > 127)
+    if non_ascii == 0:
+        return user_query
+
+    if not settings.GROQ_API_KEY:
+        return user_query
+
+    try:
+        response = client.chat.completions.create(
+            model=settings.MODEL_NAME,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a translator. Translate the following Vietnamese text to English. "
+                        "Keep technical terms (like server names, error codes, ports) unchanged. "
+                        "Only output the translated text, nothing else."
+                    ),
+                },
+                {"role": "user", "content": user_query},
+            ],
+            temperature=0.1,
+        )
+        translated = response.choices[0].message.content.strip()
+        return translated if translated else user_query
+    except Exception:
+        return user_query
+
+
 def _clean_markdown(text: str) -> str:
     text = re.sub(r"\*+", "", text)
     text = re.sub(r"\s+\n", "\n", text)

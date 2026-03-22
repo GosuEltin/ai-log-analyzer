@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Log Investigator — Trợ Lý Chẩn Đoán Sự Cố Thông Minh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --secondary: #06b6d4;
+            --bg: #030712;
+            --card: #111827;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.08), transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.08), transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-box {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .logo h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .status.online .status-dot {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* --- Control Center --- */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-inp {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .card-inp:focus-within {
+            border-color: var(--primary);
+        }
+
+        .label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .drop-zone {
+            height: 140px;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: rgba(139, 92, 246, 0.03);
+        }
+
+        .drop-zone input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        #query-text {
+            width: 100%;
+            height: 140px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+        }
+
+        #query-text:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-go {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            border: none;
+            padding: 1.25rem;
+            border-radius: 18px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-go:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+        }
+
+        /* --- Loading Steps --- */
+        .pipeline {
+            display: none;
+            margin-bottom: 2.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: var(--border);
+        }
+
+        .step {
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100px;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            display: grid;
+            place-items: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            transition: all 0.3s;
+            color: var(--text-dim);
+        }
+
+        .step.active .step-dot {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .step.done .step-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: #fff;
+        }
+
+        .step-lbl {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        /* --- Main Dashboard --- */
+        .dashboard {
+            display: none;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-h {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-h h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-b {
+            padding: 2rem;
+        }
+
+        /* --- Diagnosis Section --- */
+        .diagnosis-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .final-summary {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .diagnosis-list {
+            list-style: none;
+        }
+
+        .diagnosis-list li {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            align-items: flex-start;
+        }
+
+        .diag-icon {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+
+        /* --- Stats grid --- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .stat-v {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        .stat-l {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Explanatory Elements --- */
+        .explanation {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .cluster-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .cluster-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .cluster-name {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+
+        .c-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .c-count {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 100px;
+        }
+
+        .c-body {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .c-sample {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: #000;
+            padding: 10px;
+            border-radius: 8px;
+            color: #9ca3af;
+            overflow-x: auto;
+        }
+
+        /* --- Service Breakdown --- */
+        .svc-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .svc-name {
+            width: 140px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .svc-progress-bg {
+            position: relative;
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .svc-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .svc-val {
+            width: 40px;
+            font-size: 0.8rem;
+            text-align: right;
+            font-weight: 800;
+            color: var(--text-dim);
+        }
+
+        /* --- Animation --- */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Action item --- */
+        .action-card {
+            display: flex;
+            gap: 15px;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .action-st {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+
+        .action-ok {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .action-fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .action-body h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .action-body p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .action-res {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            background: #000;
+            padding: 8px;
+            border-radius: 6px;
+            color: var(--success);
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div>
+                    <h1>AI Log Investigator</h1>
+                    <p>Hệ thống hỗ trợ chẩn đoán sự cố cho người dùng</p>
+                </div>
+            </div>
+            <div class="status" id="be-status">
+                <div class="status-dot"></div>
+                <span id="be-msg">Đang kết nối Backend...</span>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="card-inp">
+                <label class="label">1. CHỌN FILE LOG HỆ THỐNG</label>
+                <div class="drop-zone" id="dropzone">
+                    <input type="file" id="fi" accept=".log,.txt">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
+                        stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p style="margin-top: 0.5rem; font-weight: 700;">Nhấn hoặc kéo file vào đây</p>
+                    <p id="fn" style="font-size: 0.8rem; color: var(--success); margin-top: 4px; font-weight: 800;"></p>
+                </div>
+            </div>
+            <div class="card-inp">
+                <label class="label">2. BẠN MUỐN AI TRẬP TRUNG VÀO ĐIỀU GÌ? (KHÔNG BẮT BUỘC)</label>
+                <textarea id="query-text"
+                    placeholder="Ví dụ: 'Tại sao khách hàng không đăng nhập được?' hoặc 'Kiểm tra xem hệ thống có bị quá tải không'..."></textarea>
+            </div>
+            <button class="btn-go" id="btn-go">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                YÊU CẦU AI PHÂN TÍCH NGAY
+            </button>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="pipeline" id="pip">
+            <div class="steps">
+                <div class="step" id="s1">
+                    <div class="step-dot">1</div>
+                    <div class="step-lbl">Đọc Log</div>
+                </div>
+                <div class="step" id="s2">
+                    <div class="step-dot">2</div>
+                    <div class="step-lbl">Phân Loại Lỗi</div>
+                </div>
+                <div class="step" id="s3">
+                    <div class="step-dot">3</div>
+                    <div class="step-lbl">Tra Kiến Thức</div>
+                </div>
+                <div class="step" id="s4">
+                    <div class="step-dot">4</div>
+                    <div class="step-lbl">Lập Kế Hoạch</div>
+                </div>
+                <div class="step" id="s5">
+                    <div class="step-dot">5</div>
+                    <div class="step-lbl">Chạy Công Cụ</div>
+                </div>
+                <div class="step" id="s6">
+                    <div class="step-dot">6</div>
+                    <div class="step-lbl">Kết Luận</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="db">
+            <div class="main-col">
+                <!-- Final Result -->
+                <div class="card diagnosis-box">
+                    <div class="card-h">
+                        <h3>👨‍⚕️ KẾT LUẬN CỦA BÁC SĨ AI</h3>
+                        <span id="sev-tag"
+                            style="background:var(--danger); padding:4px 12px; border-radius:100px; font-size:0.7rem; font-weight:800;">NGHIÊM
+                            TRỌNG</span>
+                    </div>
+                    <div class="card-b">
+                        <div class="final-summary" id="final-sum"></div>
+                        <ul class="diagnosis-list" id="diag-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-v" id="st-total">0</div>
+                        <div class="stat-l">Dòng Log Đã Đọc</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-v" style="color:var(--danger)" id="st-err">0</div>
+                        <div class="stat-l">Lỗi Nghiêm Trọng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-v" id="st-cl">0</div>
+                        <div class="stat-l">Nhóm Vấn Đề</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-v" style="color:var(--secondary)" id="st-sev">---</div>
+                        <div class="stat-l">Mức Độ Rủi Ro</div>
+                    </div>
+                </div>
+
+                <!-- Clusters -->
+                <div class="card">
+                    <div class="card-h">
+                        <h3>🔍 CHI TIẾT CÁC NHÓM VẤN ĐỀ PHÁT HIỆN</h3>
+                    </div>
+                    <div class="card-b" id="cluster-box"></div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-h">
+                        <h3>🛠 HÀNH ĐỘNG AI ĐÃ THỰC HIỆN ĐỂ KIỂM CHỨNG</h3>
+                    </div>
+                    <div class="card-b" id="action-box"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="side-col">
+                <div class="card">
+                    <div class="card-h">
+                        <h3>📡 BẢN ĐỒ SERVICE</h3>
+                    </div>
+                    <div class="card-b" id="svc-box"></div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--danger);">
+                    <div class="card-h">
+                        <h3>📍 NGUYÊN NHÂN CHÍNH</h3>
+                    </div>
+                    <div class="card-b">
+                        <ul id="cause-list" style="padding-left:15px; font-size:0.9rem;"></ul>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--success);">
+                    <div class="card-h">
+                        <h3>💡 ĐỀ XUẤT CẦN LÀM NGAY</h3>
+                    </div>
+                    <div class="card-b">
+                        <ul id="rec-list" style="padding-left:15px; font-size:0.9rem;"></ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-h">
+                        <h3>📖 KIẾN THỨC TRA ĐƯỢC</h3>
+                    </div>
+                    <div class="card-b" id="rag-box" style="font-size:0.8rem; color:var(--text-dim);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000';
+        const DICT = {
+            'jk2_init': 'Hệ thống Khởi động (Startup)',
+            'workerEnv': 'Môi trường xử lý Backend',
+            'mod_jk': 'Cầu nối Apache-Tomcat (Connector)',
+            'client_request': 'Lưu lượng Truy cập Người dùng',
+            'apache': 'Máy chủ Web (Apache Server)',
+            'mod_jk workerEnv error state': 'Lỗi mất kết nối hoàn toàn với Backend',
+            'Directory access forbidden': 'Lỗi thiếu quyền truy cập file',
+            'Apache scoreboard child mismatch': 'Lỗi đồng bộ bộ nhớ tiến trình',
+            'Apache child initialization issue': 'Lỗi khởi tạo trình xử lý phụ',
+            'Other apache issue': 'Lỗi hệ thống Web Server khác',
+            'HIGH': 'CAO (Cần xử lý ngay)',
+            'MEDIUM': 'TRUNG BÌNH',
+            'LOW': 'THẤP'
+        };
+
+        async function ch() {
+            try {
+                const r = await fetch(`${API}/health`);
+                if (r.ok) {
+                    document.getElementById('be-status').classList.add('online');
+                    document.getElementById('be-msg').innerText = 'HỆ THỐNG SẴN SÀNG';
+                }
+            } catch {
+                document.getElementById('be-status').classList.remove('online');
+                document.getElementById('be-msg').innerText = 'Backend đang tắt';
+            }
+        }
+        setInterval(ch, 3000); ch();
+
+        document.getElementById('fi').addEventListener('change', e => {
+            if (e.target.files[0]) document.getElementById('fn').innerText = '✓ ' + e.target.files[0].name;
+        });
+
+        document.getElementById('btn-go').addEventListener('click', async () => {
+            const f = document.getElementById('fi').files[0];
+            if (!f) return alert('Hãy chọn file log!');
+
+            document.getElementById('db').style.display = 'none';
+            document.getElementById('pip').style.display = 'block';
+
+            let s = 1;
+            const iv = setInterval(() => {
+                if (s <= 5) {
+                    document.getElementById('s' + s).classList.add('done');
+                    s++;
+                    document.getElementById('s' + s).classList.add('active');
+                } else { clearInterval(iv); }
+            }, 600);
+
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('user_query', document.getElementById('query-text').value);
+
+            try {
+                const r = await fetch(`${API}/analyze-log`, { method: 'POST', body: fd });
+                const d = await r.json();
+
+                clearInterval(iv);
+                document.querySelectorAll('.step').forEach(e => e.classList.add('done'));
+                setTimeout(() => {
+                    document.getElementById('pip').style.display = 'none';
+                    render(d.result);
+                }, 800);
+            } catch (err) {
+                alert('Có lỗi: ' + err.message);
+                document.getElementById('pip').style.display = 'none';
+            }
+        });
+
+        function render(res) {
+            document.getElementById('db').style.display = 'grid';
+
+            // Stats
+            document.getElementById('st-total').innerText = res.overview.total_lines;
+            document.getElementById('st-err').innerText = res.overview.error_count;
+            document.getElementById('st-cl').innerText = res.clusters.length;
+            document.getElementById('st-sev').innerText = DICT[res.severity] || res.severity;
+
+            // Diagnosis
+            document.getElementById('sev-tag').innerText = DICT[res.severity] || res.severity;
+            document.getElementById('final-sum').innerText = res.final_summary || res.summary;
+            const dl = document.getElementById('diag-list'); dl.innerHTML = '';
+            (res.final_diagnosis || []).forEach(d => {
+                dl.innerHTML += `<li><div class="diag-icon"></div><span>${d}</span></li>`;
+            });
+
+            // Service Breakdown
+            const sb = document.getElementById('svc-box'); sb.innerHTML = '';
+            const services = res.overview.top_services;
+            const max = Math.max(...Object.values(services), 1);
+            Object.entries(services).forEach(([k, v]) => {
+                const name = DICT[k] || k;
+                const per = (v / max * 100);
+                sb.innerHTML += `
+                    <div class="svc-bar-row">
+                        <div class="svc-name">${name}</div>
+                        <div class="svc-progress-bg"><div class="svc-progress-fill" style="width:${per}%"></div></div>
+                        <div class="svc-val">${v}</div>
+                    </div>
+                `;
+            });
+
+            // Clusters
+            const cb = document.getElementById('cluster-box'); cb.innerHTML = '';
+            res.clusters.forEach(c => {
+                const name = DICT[c.label] || c.label;
+                cb.innerHTML += `
+                    <div class="cluster-item">
+                        <div class="cluster-name">
+                            <span class="c-title">${name}</span>
+                            <span class="c-count">${c.count} lỗi</span>
+                        </div>
+                        <p class="c-body">${name} xảy ra khi hệ thống gặp vấn đề ở tầng ${DICT[c.services[0]] || c.services[0]}.</p>
+                        <div class="explanation">Ví dụ về dòng lỗi này trong tài liệu:</div>
+                        <div class="c-sample">${c.samples[0]}</div>
+                    </div>
+                `;
+            });
+
+            // Executed Actions
+            const ab = document.getElementById('action-box'); ab.innerHTML = '';
+            res.executed_actions.forEach(a => {
+                ab.innerHTML += `
+                    <div class="action-card">
+                        <div class="action-st ${a.success ? 'action-ok' : 'action-fail'}">${a.success ? '✓' : '✗'}</div>
+                        <div class="action-body">
+                            <h4>${a.title}</h4>
+                            <p>Sử dụng công cụ ${a.tool} để kiểm tra.</p>
+                            <div class="action-res">${a.output.substring(0, 200)}${a.output.length > 200 ? '...' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Lists
+            const cl = document.getElementById('cause-list'); cl.innerHTML = '';
+            res.probable_causes.forEach(c => cl.innerHTML += `<li style="margin-bottom:8px;">${c}</li>`);
+
+            const rl = document.getElementById('rec-list'); rl.innerHTML = '';
+            res.recommendations.forEach(r => rl.innerHTML += `<li style="margin-bottom:8px;">${r}</li>`);
+
+            const rb = document.getElementById('rag-box'); rb.innerHTML = '';
+            res.retrieved_knowledge.forEach(k => rb.innerHTML += `<div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:10px;">${k}</div>`);
+        }
+    </script>
+</body>
+
+</html>
