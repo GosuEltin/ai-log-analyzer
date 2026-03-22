@@ -163,7 +163,8 @@ class TestDeriveProbableCauses:
     def test_no_clusters_fallback(self):
         causes = derive_probable_causes([])
         assert len(causes) == 1
-        assert "chưa xác định" in causes[0].lower()
+        # Check English fallback message
+        assert "not yet clearly identified" in causes[0].lower()
 
 
 # =============================================================================

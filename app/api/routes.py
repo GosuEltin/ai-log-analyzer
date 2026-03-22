@@ -165,16 +165,24 @@ async def analyze_log(
     executed_actions = execute_action_checks(action_checks, max_actions=4)
 
     # Phase 6: Final reasoning with tool results
+    # Limit cluster samples to max 2 per cluster to reduce payload size for LLM
+    clusters_for_final = []
+    for c in clusters[:5]:
+        c_copy = c.copy()
+        if "samples" in c_copy and len(c_copy["samples"]) > 2:
+            c_copy["samples"] = c_copy["samples"][:2]
+        clusters_for_final.append(c_copy)
+    
     final_payload = {
         "user_query": translated_query,
         "focus_mode": focus_mode,
         "primary_issue": primary_issue,
         "secondary_issues": secondary_issues,
         "overview": overview.model_dump(),
-        "clusters": clusters[:5],
+        "clusters": clusters_for_final,
         "probable_causes": probable_causes,
         "recommendations": recommendations,
-        "evidence": evidence,
+        "evidence": evidence[:5],  # Limit to top 5 evidence samples
         "retrieved_knowledge": retrieved_knowledge,
         "severity": severity,
         "initial_summary": summary,

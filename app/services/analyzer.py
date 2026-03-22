@@ -73,7 +73,14 @@ def build_clusters(records: List[LogRecord]) -> List[ErrorCluster]:
     for label, items in grouped.items():
         service_counts = Counter(item.service for item in items)
         services = [svc for svc, _ in service_counts.most_common(3)]
-        samples = [item.raw for item in items[:3]]
+        
+        # Get ALL unique samples (deduplicate identical raw log lines)
+        seen = set()
+        samples = []
+        for item in items:
+            if item.raw not in seen:
+                samples.append(item.raw)
+                seen.add(item.raw)
 
         clusters.append(
             ErrorCluster(
