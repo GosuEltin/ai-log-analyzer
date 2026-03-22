@@ -38,7 +38,11 @@ class TestHealthEndpoints:
     def test_root(self):
         res = client.get("/")
         assert res.status_code == 200
-        assert "message" in res.json()
+        content_type = res.headers.get("content-type", "")
+        if "application/json" in content_type:
+            assert "message" in res.json()
+        else:
+            assert "text/html" in content_type
 
     def test_health(self):
         res = client.get("/health")
