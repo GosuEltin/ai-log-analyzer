@@ -79,7 +79,8 @@ def build_clusters(records: List[LogRecord]) -> List[ErrorCluster]:
         samples = []
         for item in items:
             if item.raw not in seen:
-                samples.append(item.raw)
+                if len(samples) < 50:  # Limit max samples retained per cluster
+                    samples.append(item.raw)
                 seen.add(item.raw)
 
         clusters.append(

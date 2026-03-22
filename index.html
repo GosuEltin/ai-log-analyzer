@@ -908,6 +908,12 @@
             document.getElementById('db').style.display = 'none';
             document.getElementById('pip').style.display = 'block';
 
+            // RESET STEPS
+            document.querySelectorAll('.step').forEach(e => {
+                e.classList.remove('active');
+                e.classList.remove('done');
+            });
+
             let s = 0;
             document.getElementById('s1').classList.add('active');
             const iv = setInterval(() => {

@@ -144,16 +144,24 @@ async def analyze_log(
     )
 
     # Phase 4: Initial reasoning
+    # Limit cluster samples for summary generation to speed up LLM
+    clusters_for_summary = []
+    for c in clusters[:5]:
+        c_copy = c.copy()
+        if "samples" in c_copy and len(c_copy["samples"]) > 3:
+            c_copy["samples"] = c_copy["samples"][:3]
+        clusters_for_summary.append(c_copy)
+
     summary_payload = {
         "user_query": translated_query,
         "focus_mode": focus_mode,
         "primary_issue": primary_issue,
         "secondary_issues": secondary_issues,
         "overview": overview.model_dump(),
-        "clusters": clusters[:5],
+        "clusters": clusters_for_summary,
         "probable_causes": probable_causes,
         "recommendations": recommendations,
-        "evidence": evidence,
+        "evidence": evidence[:5],
         "retrieved_knowledge": retrieved_knowledge,
         "severity": severity,
         "action_checks": action_checks,
