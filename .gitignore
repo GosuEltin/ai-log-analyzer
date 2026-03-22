@@ -24,3 +24,5 @@ Thumbs.db
 data/vectorstore/
 data/logs/*.log
 !data/logs/.gitkeep
+
+Hackathon_ Spec - Digital Worker - Final Round.docx.md
