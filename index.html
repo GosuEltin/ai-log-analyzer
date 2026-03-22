@@ -880,7 +880,8 @@
     </div>
 
     <script>
-        const API = window.location.origin;
+        // Auto-detect: if on Live Server (5500), point to FastAPI (8000), else use relative.
+        const API = window.location.port === '5500' ? 'http://127.0.0.1:8000' : "";
 
         async function ch() {
             try {
