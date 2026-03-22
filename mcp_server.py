@@ -7,8 +7,8 @@ from pathlib import Path
 try:
     from mcp.server.fastmcp import FastMCP
 except ImportError:
-    print("Vui lòng cài đặt thư viện: pip install mcp httpx")
-    exit(1)
+    print("Please install required packages: pip install mcp httpx")
+    import sys; sys.exit(1)
 
 # Khởi tạo MCP Server
 mcp = FastMCP("AILogAnalyzer")
@@ -69,10 +69,6 @@ async def analyze_workspace_log(log_content: str, user_query: str) -> str:
         return f"Xảy ra lỗi nghiêm trọng: {str(e)}"
 
 if __name__ == "__main__":
-    # Chạy MCP bằng giao thức SSE HTTP để nhận kết nối từ Remote IDE (VS Code) thay vì file local
-    print("Khởi chạy SSE MCP Server tại cổng 8001...")
-    # Lắng nghe 0.0.0.0 để tương thích với Docker Port Mapping
-    import uvicorn
-    app = mcp._create_sse_app()
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    # Chạy bằng giao thức stdio để Cursor/VS Code Local tự gọi ngầm (không cần tự bật file này)
+    mcp.run(transport='stdio')
 
