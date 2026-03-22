@@ -1,0 +1,535 @@
+﻿Được. Với backend hiện tại của bạn, frontend nên được thiết kế như một bảng điều khiển điều tra sự cố AI chứ không phải chỉ là form upload file.
+Mục tiêu của giao diện là làm 3 việc cùng lúc:
+* cho người xem thấy backend đang chạy thật
+* cho giám khảo thấy AI + RAG + function calling hoạt động rõ ràng
+* giúp người dùng hiểu rất nhanh: đã xảy ra gì, vì sao, và nên làm gì tiếp theo
+Tôi sẽ lên cho bạn một ý tưởng frontend đủ đầy đủ, đẹp, rõ ràng, và bám sát response body hiện tại.
+________________
+
+
+1) Tên sản phẩm và định vị
+Tên gợi ý
+AI Log Analyzer
+hoặc
+Trợ lý điều tra log Apache
+Tagline tiếng Việt
+Phân tích log, truy xuất tri thức, thực thi kiểm tra, và đề xuất hướng xử lý.
+________________
+
+
+2) Mục tiêu UX của frontend
+Khi người dùng mở giao diện, họ phải làm được ngay 4 việc:
+1. Tải file log lên
+2. Nhập yêu cầu điều tra cụ thể
+3. Xem kết quả phân tích tổng quan
+4. Xem hệ thống đã dùng công cụ nào, lấy tri thức gì, và kết luận ra sao
+Tức là UI không chỉ hiển thị JSON, mà phải kể được câu chuyện:
+Log thô
+-> AI phân tích
+-> RAG lấy tri thức
+-> Tool được gọi
+-> AI kết luận lại
+
+
+________________
+
+
+3) Bố cục tổng thể nên làm
+Tôi khuyên dùng giao diện kiểu dashboard hiện đại, 1 trang chính, chia thành 3 vùng:
+Vùng A — Thanh đầu trang
+* tên sản phẩm
+* trạng thái hệ thống
+* nút tải file mới
+* nút chạy phân tích lại
+Vùng B — Khu điều khiển đầu vào
+* upload file
+* ô nhập yêu cầu điều tra
+* nút phân tích
+* nút dùng log mẫu
+Vùng C — Khu kết quả
+chia thành nhiều khối lớn:
+* tổng quan
+* cluster lỗi
+* tri thức truy xuất
+* action checks
+* executed actions
+* kết luận cuối
+________________
+
+
+4) Cấu trúc 1 trang lý tưởng
+Khu 1: Header
+Thanh trên cùng, nền tối hoặc nền trắng tùy theme.
+Thành phần
+* logo nhỏ hoặc icon kính lúp/log
+* tên: AI Log Analyzer
+* badge trạng thái:
+   * Sẵn sàng
+   * Đang phân tích
+   * Hoàn tất
+* bên phải:
+   * nút Tải file khác
+   * nút Phân tích lại
+Mục đích
+Cho cảm giác sản phẩm thật, không phải bài demo sơ sài.
+________________
+
+
+Khu 2: Bảng nhập liệu
+Đây là nơi người dùng bắt đầu.
+Khối trái: Upload file
+* ô kéo-thả file
+* text:
+   * Kéo thả file log Apache vào đây
+   * hoặc bấm để chọn file
+* hiển thị tên file sau khi chọn
+Khối phải: Yêu cầu điều tra
+Một ô textarea có nhãn:
+Yêu cầu điều tra (tùy chọn)
+Placeholder:
+* Ví dụ: Chỉ phân tích các dấu hiệu cho thấy Tomcat chết hoặc AJP port không mở
+* Ví dụ: Tập trung vào lỗi mod_jk và bỏ qua lỗi truy cập thư mục
+Nút chính
+* Phân tích log
+Nút phụ
+* Dùng log mẫu
+* Xóa dữ liệu
+Ghi chú nhỏ
+* Hệ thống sẽ parse log, truy xuất tri thức, thực thi kiểm tra và đưa ra kết luận.
+________________
+
+
+5) Khu loading phải thật đẹp
+Đây là chỗ cực đáng giá trong demo.
+Khi bấm phân tích, không chỉ hiện spinner.
+Hãy hiển thị pipeline các bước:
+* Đang đọc file log...
+* Đang phân cụm lỗi...
+* Đang truy xuất tri thức...
+* Đang tạo kế hoạch kiểm tra...
+* Đang thực thi công cụ...
+* Đang tổng hợp kết luận...
+Bạn có thể hiện thành:
+* timeline dọc
+* hoặc stepper ngang
+Cái này làm sản phẩm nhìn rất “AI workflow”.
+________________
+
+
+6) Khu kết quả: bố cục tốt nhất
+Tôi khuyên chia thành 2 cột lớn:
+Cột trái (chiếm khoảng 60%)
+* Tổng quan
+* Cụm lỗi
+* Bằng chứng log
+* Tri thức truy xuất
+Cột phải (chiếm khoảng 40%)
+* Tóm tắt AI
+* Nguyên nhân khả dĩ
+* Hành động đề xuất
+* Công cụ đã thực thi
+* Kết luận cuối
+________________
+
+
+7) Khối “Tổng quan”
+Đây là hàng card đầu tiên sau khi có kết quả.
+Hiển thị 5 card
+Card 1
+Tổng số dòng log
+2000
+Card 2
+Số lỗi
+595
+Card 3
+Tệp đang phân tích
+Apache_2k.log
+Card 4
+Mức độ nghiêm trọng
+HIGH
+Card 5
+Vấn đề chính
+mod_jk workerEnv error state
+Thiết kế
+* card bo góc
+* số to
+* màu severity rõ:
+   * HIGH đỏ/cam
+   * MEDIUM vàng
+   * LOW xanh lá
+________________
+
+
+8) Khối “Cụm lỗi”
+Đây là trái tim của giao diện.
+Hiển thị dạng danh sách card
+Mỗi cluster là một card riêng.
+Mỗi card có:
+* tên cluster
+* số lần xuất hiện
+* service liên quan
+* 2 log mẫu
+* badge:
+   * Chính
+   * Phụ
+Ví dụ card
+mod_jk workerEnv error state
+539 lần
+Service: mod_jk
+Badge: Vấn đề chính
+Sample logs:
+* [Sun Dec 04 04:47:44 2005] [error] mod_jk child workerEnv in error state 6
+* ...
+Hiệu ứng nên có
+* card vấn đề chính nổi bật hơn
+* cluster phụ màu dịu hơn
+________________
+
+
+9) Khối “Bằng chứng log”
+Hiển thị các evidence snippet mà backend trả về.
+Thiết kế
+* mỗi dòng log trong ô nền tối
+* font monospace
+* có nút copy
+Lợi ích
+Giám khảo sẽ thấy:
+* hệ thống không bịa
+* luôn có chứng cứ gốc từ log
+________________
+
+
+10) Khối “Tri thức truy xuất (RAG)”
+Đây là phần bạn nhất định phải show, vì đây là điểm chứng minh backend mạnh.
+Tiêu đề
+Tri thức truy xuất
+Mỗi tài liệu hiển thị thành 1 card:
+* tên nguồn
+* loại nguồn:
+   * Runbook
+   * Ghi chú kỹ thuật
+   * Tài liệu chính thức
+* chủ đề
+* preview vài dòng đầu
+* nút Xem thêm
+Ví dụ
+mod_jk_worker_error.md
+Loại: Runbook
+Chủ đề: mod_jk_worker_error
+Preview:
+* Symptoms
+* Possible causes
+* First checks
+Mục tiêu
+Khi nhìn vào, người xem hiểu ngay:
+* hệ thống không chỉ đọc log
+* còn đi tra kiến thức
+* rồi mới suy luận
+________________
+
+
+11) Khối “Tóm tắt AI”
+Đây là summary đầu tiên.
+Tiêu đề
+Tóm tắt điều tra ban đầu
+Nội dung
+Hiển thị 4 dòng:
+* Tổng quan
+* Lỗi chính
+* Nguyên nhân khả dĩ
+* Hành động ưu tiên
+Thiết kế:
+* nền sáng hoặc hơi nổi
+* dễ đọc
+* không nhồi quá nhiều chữ
+________________
+
+
+12) Khối “Nguyên nhân khả dĩ”
+Hiển thị probable_causes.
+Thiết kế tốt nhất
+Dạng danh sách ưu tiên:
+1. backend/Tomcat không phản hồi
+2. AJP port không mở
+3. Apache không kết nối được tới backend
+4. issue phụ khác
+Có thể thêm icon:
+* cảnh báo
+* kết nối
+* cấu hình
+* truy cập
+________________
+
+
+13) Khối “Hành động đề xuất”
+Hiển thị recommendations.
+Nên trình bày như checklist
+Ví dụ:
+* Xác nhận backend/Tomcat còn chạy
+* Kiểm tra AJP port 8009
+* Đọc mod_jk.log
+* Rà workers2.properties
+Lợi ích
+Rất thực dụng, nhìn giống công cụ hỗ trợ kỹ sư thật.
+________________
+
+
+14) Khối “Kế hoạch dùng công cụ”
+Hiển thị action_checks.
+Đây là chỗ cực kỳ quan trọng để chứng minh function calling.
+Mỗi action card nên có:
+* tiêu đề
+* tool
+* args
+* command
+* purpose
+* priority
+Ví dụ
+Kiểm tra cổng AJP của backend
+Tool: check_tcp_port
+Args:
+* host: localhost
+* port: 8009
+Command:
+telnet localhost 8009
+Purpose:
+Xác nhận Apache có thể mở kết nối tới backend qua AJP.
+Priority:
+1
+Vì sao phải show
+Đây là nơi bạn chỉ ra:
+* model không chỉ nói bằng chữ
+* model đã lập kế hoạch gọi công cụ có cấu trúc
+________________
+
+
+15) Khối “Công cụ đã thực thi”
+Hiển thị executed_actions.
+Đây là phần rất mạnh và cần làm đẹp nhất.
+Mỗi executed action là một card
+Hiển thị:
+* tên action
+* tool
+* success/fail
+* output
+* error nếu có
+Màu sắc
+* success = xanh
+* fail = đỏ/cam
+* warning = vàng
+Ví dụ
+Kiểm tra backend HTTP trực tiếp
+Tool: check_http_endpoint
+Kết quả: Thất bại
+Output:
+Connection refused or endpoint unavailable in demo environment.
+Đây là chỗ “wow”
+Người xem sẽ thấy:
+* hệ thống đã chạy kiểm tra thật
+* không chỉ tạo text giả
+________________
+
+
+16) Khối “Kết luận cuối”
+Đây là phần quan trọng nhất ở cột phải.
+Gồm 2 phần
+A. Kết luận cuối cùng
+Hiển thị final_summary
+B. Chẩn đoán cuối
+Hiển thị final_diagnosis dưới dạng list
+Ví dụ:
+* Nhiều khả năng backend/Tomcat không phản hồi hoặc chưa lắng nghe trên cổng AJP 8009.
+* Các lỗi mod_jk workerEnv và scoreboard phù hợp với tình huống Apache không kết nối được tới backend.
+* Issue truy cập thư mục là vấn đề phụ, không phải trọng tâm của điều tra này.
+Mục đích
+Đây là câu trả lời cuối mà người dùng quan tâm nhất:
+* chuyện gì đang xảy ra thật sự
+* cái gì là chính
+* cái gì là phụ
+________________
+
+
+17) Khối “So sánh trước và sau khi dùng tool”
+Tôi rất khuyên thêm một vùng nhỏ này vì nó làm demo mạnh hơn.
+Tiêu đề
+AI trước và sau khi dùng công cụ
+Bên trái
+Tóm tắt ban đầu
+Bên phải
+Kết luận sau khi thực thi kiểm tra
+Giá trị demo
+Bạn sẽ cho thấy:
+* trước khi dùng tool: AI có giả thuyết
+* sau khi dùng tool: AI chắc hơn
+Đây là cách cực hay để chứng minh function calling có tác dụng.
+________________
+
+
+18) Tính năng bắt buộc nên có trong frontend
+Bắt buộc
+* upload file
+* nhập user_query
+* loading pipeline
+* hiển thị overview
+* hiển thị clusters
+* hiển thị summary
+* hiển thị retrieved knowledge
+* hiển thị action_checks
+* hiển thị executed_actions
+* hiển thị final_summary/final_diagnosis
+Nên có
+* copy log snippet
+* thu gọn/mở rộng card
+* nút phân tích lại
+* nút tải file khác
+Cộng điểm mạnh
+* nút Dùng log mẫu
+* nút Xuất báo cáo
+* badge Issue chính / Issue phụ
+________________
+
+
+19) Giao diện bằng tiếng Việt — text gợi ý
+Header
+* AI Log Analyzer
+* Trợ lý điều tra log Apache
+Form
+* Tải file log
+* Yêu cầu điều tra
+* Phân tích log
+* Dùng log mẫu
+Loading
+* Đang đọc file log
+* Đang phân cụm lỗi
+* Đang truy xuất tri thức
+* Đang chuẩn bị hành động
+* Đang thực thi công cụ
+* Đang tổng hợp kết luận
+Sections
+* Tổng quan
+* Cụm lỗi
+* Bằng chứng log
+* Tri thức truy xuất
+* Tóm tắt AI
+* Nguyên nhân khả dĩ
+* Hành động đề xuất
+* Kế hoạch dùng công cụ
+* Kết quả thực thi công cụ
+* Kết luận cuối
+________________
+
+
+20) Phong cách thẩm mỹ tôi khuyên dùng
+Theme
+Nên dùng giao diện tối hiện đại:
+* nền: slate đậm
+* card: đen/xám đậm
+* điểm nhấn: xanh dương / tím
+* severity: đỏ cam
+Vì sao
+* log và dashboard kỹ thuật hợp theme tối
+* nhìn “xịn” hơn khi demo
+* dễ nổi bật card và badge
+Chi tiết
+* bo góc lớn
+* shadow nhẹ
+* spacing thoáng
+* font monospace cho log
+* animation fade nhẹ khi loading / hiển thị dữ liệu
+________________
+
+
+21) Cấu trúc component nên làm
+Nếu bạn dùng React/Next.js, tôi khuyên chia như sau:
+components/
+├─ HeaderBar.tsx
+├─ UploadPanel.tsx
+├─ InvestigationQueryBox.tsx
+├─ AnalyzeButton.tsx
+├─ LoadingPipeline.tsx
+├─ OverviewCards.tsx
+├─ SeverityBadge.tsx
+├─ ClusterList.tsx
+├─ ClusterCard.tsx
+├─ EvidencePanel.tsx
+├─ KnowledgePanel.tsx
+├─ KnowledgeCard.tsx
+├─ SummaryPanel.tsx
+├─ CausesPanel.tsx
+├─ RecommendationsPanel.tsx
+├─ ActionChecksPanel.tsx
+├─ ExecutedActionsPanel.tsx
+├─ FinalDiagnosisPanel.tsx
+└─ BeforeAfterPanel.tsx
+
+
+________________
+
+
+22) Cách chứng minh backend mạnh qua frontend
+Đây là điều quan trọng nhất.
+Frontend của bạn phải làm lộ ra được 5 sức mạnh backend:
+1. Parse tốt
+Hiển thị:
+* parsed 2000/2000
+* failed 0
+2. Cluster tốt
+Hiển thị:
+* cụm lỗi rõ
+* count rõ
+3. RAG thật
+Hiển thị:
+* source name
+* type
+* preview
+4. Function calling thật
+Hiển thị:
+* tool
+* args
+* executed result
+5. Final reasoning thật
+Hiển thị:
+* initial summary
+* final summary
+* final diagnosis
+Nếu frontend làm lộ được cả 5 lớp này, giám khảo sẽ thấy backend của bạn rất mạnh.
+________________
+
+
+23) Luồng demo đẹp nhất trên giao diện
+Bước 1
+Mở app, thấy giao diện sạch
+Bước 2
+Upload Apache_2k.log
+Bước 3
+Nhập query:
+Chỉ phân tích các dấu hiệu cho thấy Tomcat chết hoặc AJP port không mở
+Bước 4
+Bấm Phân tích log
+Bước 5
+Loading pipeline chạy qua 6 bước
+Bước 6
+Dashboard hiện ra:
+* severity HIGH
+* issue chính là mod_jk
+* retrieved knowledge đúng focus backend
+* executed actions cho thấy:
+   * HTTP fail
+   * AJP fail
+   * mod_jk.log có lỗi kết nối
+* final diagnosis kết luận tập trung vào Tomcat/AJP
+Flow này rất đẹp.
+________________
+
+
+24) Kết luận thiết kế
+Frontend của bạn không nên chỉ là:
+* form upload
+* box hiển thị JSON
+Mà phải là:
+một bảng điều khiển điều tra sự cố AI có giải thích, tri thức, công cụ và kết luận
+Đó là cách tốt nhất để “khoe” backend.
+________________
+
+
+Bước tiếp theo hợp lý nhất là tôi viết luôn cho bạn bản thiết kế chi tiết theo layout từng khối hoặc code frontend React/Next.js hoàn chỉnh bằng tiếng Việt.

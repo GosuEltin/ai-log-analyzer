@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Next.js / Node
+node_modules/
+.next/
+out/
+build/
+frontend/.next/
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data / Vector DB (Optional but recommended for large DBs)
+data/vectorstore/
+data/logs/*.log
+!data/logs/.gitkeep
