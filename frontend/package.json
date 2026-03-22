@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "start http://127.0.0.1:5500/index.html",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
