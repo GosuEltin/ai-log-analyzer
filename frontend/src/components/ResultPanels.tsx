@@ -1,5 +1,5 @@
 import { AnalysisResult, ErrorCluster, ActionCheck, ToolExecutionResult } from "@/types/schema";
-import { AlertTriangle, ServerCrash, FileCode, Search, CheckCircle2, ShieldAlert, Cpu, Terminal, BookOpen, ScrollText } from "lucide-react";
+import { AlertTriangle, ServerCrash, FileCode, Search, CheckCircle2, ShieldAlert, Cpu, Terminal, BookOpen, ScrollText, Activity } from "lucide-react";
 
 export function OverviewCards({ result }: { result: AnalysisResult }) {
   const isHigh = result.severity === "CRITICAL" || result.severity === "HIGH";
@@ -182,6 +182,61 @@ export function AIReasoningRightColumn({ result }: { result: AnalysisResult }) {
            </ul>
          </div>
       )}
+    </div>
+  );
+}
+
+export function ServiceBreakdownChart({ topServices }: { topServices: Record<string, number> }) {
+  if (!topServices || Object.keys(topServices).length === 0) {
+    return null;
+  }
+
+  const entries = Object.entries(topServices).sort((a, b) => b[1] - a[1]);
+  const maxCount = Math.max(...entries.map(e => e[1]));
+
+  return (
+    <div className="p-6 bg-slate-800/40 border border-slate-700/50 rounded-2xl shadow-xl">
+      <h3 className="flex items-center gap-2 font-medium text-lg text-slate-200 border-b border-slate-800 pb-3 mb-4">
+        <Activity className="w-5 h-5 text-cyan-400"/> Phân bổ lỗi theo dịch vụ
+      </h3>
+      
+      <div className="space-y-5">
+        {entries.map(([service, count]) => {
+          const percentage = (count / maxCount) * 100;
+          const colors = [
+            "from-blue-500 to-blue-600",
+            "from-indigo-500 to-indigo-600",
+            "from-violet-500 to-violet-600",
+            "from-cyan-500 to-cyan-600",
+            "from-teal-500 to-teal-600",
+          ];
+          const colorClass = colors[entries.findIndex(e => e[0] === service) % colors.length];
+
+          return (
+            <div key={service} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-slate-300 truncate">{service}</span>
+                <span className="text-sm font-bold text-slate-200 bg-slate-900/60 px-3 py-1 rounded border border-slate-700">{count}</span>
+              </div>
+              <div className="w-full bg-slate-900/50 border border-slate-800 rounded-full overflow-hidden h-8">
+                <div
+                  className={`h-full bg-gradient-to-r ${colorClass} transition-all duration-500 flex items-center justify-end pr-3`}
+                  style={{ width: `${percentage}%` }}
+                >
+                  {percentage > 15 && <span className="text-xs font-bold text-white">{Math.round(percentage)}%</span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-slate-700/50">
+        <p className="text-xs text-slate-400">
+          <span className="font-semibold text-slate-300">Tổng: </span>
+          {entries.reduce((sum, [_, count]) => sum + count, 0)} lỗi từ {entries.length} dịch vụ
+        </p>
+      </div>
     </div>
   );
 }

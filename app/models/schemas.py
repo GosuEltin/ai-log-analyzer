@@ -63,6 +63,7 @@ class AnalysisResult(BaseModel):
     executed_actions: List[ToolExecutionResult] = []
     final_summary: str = ""
     final_diagnosis: List[str] = []
+    translated_query: str = ""
 
 
 class AnalyzeResponse(BaseModel):

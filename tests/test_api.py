@@ -12,6 +12,7 @@ import pytest
 
 from fastapi.testclient import TestClient
 from app.main import app
+from app.api.routes import _extract_line_limit
 
 client = TestClient(app)
 
@@ -140,3 +141,65 @@ class TestAnalyzeLogEndpoint:
         severity = res.json()["result"]["severity"]
         assert isinstance(severity, str)
         assert severity in {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
+
+
+# =============================================================================
+# Line Limit Extraction
+# =============================================================================
+
+class TestExtractLineLimit:
+    """Test the line limit extraction from user query."""
+
+    # Vietnamese patterns WITH number
+    def test_vietnamese_100_dong_dau(self):
+        assert _extract_line_limit("100 dòng đầu") == 100
+
+    def test_vietnamese_1_dong_dau(self):
+        assert _extract_line_limit("1 dòng đầu") == 1
+
+    def test_vietnamese_50_phan_tich_dong(self):
+        assert _extract_line_limit("phân tích 50 dòng") == 50
+
+    def test_vietnamese_200_dong_dau_tien(self):
+        assert _extract_line_limit("200 dòng đầu tiên") == 200
+
+    # Vietnamese patterns WITHOUT number (default to 1)
+    def test_vietnamese_dong_dau_only(self):
+        assert _extract_line_limit("dòng đầu") == 1
+
+    def test_vietnamese_dong_dau_tien_only(self):
+        assert _extract_line_limit("dòng đầu tiên") == 1
+
+    # English patterns WITH number
+    def test_english_first_100_lines(self):
+        assert _extract_line_limit("first 100 lines") == 100
+
+    def test_english_top_50_lines(self):
+        assert _extract_line_limit("top 50 lines") == 50
+
+    def test_english_analyze_200_lines(self):
+        assert _extract_line_limit("analyze 200 lines") == 200
+
+    def test_english_only_1_line(self):
+        assert _extract_line_limit("only 1 line") == 1
+
+    # English patterns WITHOUT number (default to 1)
+    def test_english_first_line(self):
+        assert _extract_line_limit("first line") == 1
+
+    def test_english_top_line(self):
+        assert _extract_line_limit("top line") == 1
+
+    # Edge cases
+    def test_empty_string_returns_none(self):
+        assert _extract_line_limit("") is None
+
+    def test_no_match_returns_none(self):
+        assert _extract_line_limit("some random text") is None
+
+    def test_order_independent_vietnamese(self):
+        assert _extract_line_limit("phân tích 100 dòng") == 100
+
+    def test_case_insensitive(self):
+        assert _extract_line_limit("FIRST 100 LINES") == 100
+        assert _extract_line_limit("DÒNG ĐẦU") == 1

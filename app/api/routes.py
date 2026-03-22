@@ -36,25 +36,34 @@ def _extract_line_limit(query: str) -> int | None:
     """Extract line limit from user query.
     
     Supports patterns like:
-      - Vietnamese: '100 dòng đầu', 'phân tích 50 dòng', '200 dòng đầu tiên'
-      - English:    'first 100 lines', 'top 50 lines', 'analyze 200 lines', 'only 100 lines'
+      - Vietnamese: '100 dòng đầu', '1 dòng đầu', 'phân tích 50 dòng', '200 dòng đầu tiên', 'dòng đầu' (default 1)
+      - English:    'first 100 lines', 'top 50 lines', 'analyze 200 lines', 'only 100 lines', 'first line' (default 1)
     """
     if not query:
         return None
     q = query.lower().strip()
     
-    # Vietnamese patterns: "100 dòng đầu", "phân tích 50 dòng"
+    # Vietnamese patterns with number: "100 dòng đầu", "1 dòng đầu", "phân tích 50 dòng"
     m = re.search(r'(\d+)\s*dòng', q)
     if m:
         return int(m.group(1))
     
-    # English patterns: "first 100 lines", "top 200 lines", "only 50 lines", "analyze 100 lines"
-    m = re.search(r'(?:first|top|only|analyze|check|scan|read)\s+(\d+)\s+lines', q)
+    # Vietnamese pattern WITHOUT number: "dòng đầu", "dòng đầu tiên" → default to 1
+    if re.search(r'dòng\s*(?:đầu|đầu\s*tiên)', q):
+        return 1
+    
+    # English patterns with number: "first 100 lines", "top 200 lines", "only 50 lines", "analyze 100 lines"
+    # Support both singular "line" and plural "lines"
+    m = re.search(r'(?:first|top|only|analyze|check|scan|read)\s+(\d+)\s+lines?', q)
     if m:
         return int(m.group(1))
     
+    # English pattern WITHOUT number: "first line", "top line" → default to 1
+    if re.search(r'(?:first|top|only|analyze|check|scan|read)\s+lines?', q):
+        return 1
+    
     # "100 lines" at the start or standalone
-    m = re.search(r'(\d+)\s+lines', q)
+    m = re.search(r'(\d+)\s+lines?', q)
     if m:
         return int(m.group(1))
     

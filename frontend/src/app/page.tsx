@@ -4,7 +4,7 @@ import { useState } from "react";
 import { HeaderBar } from "@/components/HeaderBar";
 import { UploadPanel } from "@/components/UploadPanel";
 import { LoadingPipeline } from "@/components/LoadingPipeline";
-import { OverviewCards, ClusterList, KnowledgePanel, AIReasoningRightColumn } from "@/components/ResultPanels";
+import { OverviewCards, ClusterList, KnowledgePanel, AIReasoningRightColumn, ServiceBreakdownChart } from "@/components/ResultPanels";
 import { AnalyzeResponse, AnalysisResult } from "@/types/schema";
 
 const PIPELINE_STEPS = [
@@ -103,6 +103,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column (60%) */}
               <div className="lg:col-span-7 space-y-8">
+                <ServiceBreakdownChart topServices={result.overview.top_services} />
                 <ClusterList clusters={result.clusters} />
                 <KnowledgePanel docs={result.retrieved_knowledge} />
               </div>
