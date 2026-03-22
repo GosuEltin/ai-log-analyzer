@@ -32,7 +32,7 @@ Hệ thống nằm trong kiến trúc **Digital Worker Platform**, hoạt độn
 |-------|-----------|---------|
 | Frontend | Next.js + TypeScript + Tailwind CSS | UI tương tác người dùng |
 | Backend | FastAPI + Python 3.11 | REST API, orchestration |
-| AI/LLM | Groq API (OpenAI-compatible) | Reasoning, summarization |
+| AI/LLM | Groq API (OpenAI-compatible) | Reasoning, summarization, translation |
 | RAG | ChromaDB + sentence-transformers | Semantic search knowledge base |
 | Embedding | all-MiniLM-L6-v2 | Vector encoding cho text |
 | Tools | Python stdlib (socket, subprocess, pathlib) | Function calling execution |
