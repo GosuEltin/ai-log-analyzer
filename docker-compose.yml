@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  # 1. Chạy Backend AI Log (FastAPI)
+  backend-api:
+    build: .
+    container_name: ai_log_analyzer_api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    
+  # 2. Chạy MCP Server bằng SSE cho Remote IDE
+  mcp-server:
+    build: .
+    container_name: ai_log_analyzer_mcp
+    command: python mcp_server.py
+    ports:
+      - "8001:8001"
+    environment:
+      # MCP Server sẽ giao tiếp nội bộ qua Gateway Docker
+      - API_BASE_URL=http://backend-api:8000
+    depends_on:
+      - backend-api
+    restart: unless-stopped

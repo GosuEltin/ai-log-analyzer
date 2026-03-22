@@ -71,4 +71,8 @@ async def analyze_workspace_log(log_content: str, user_query: str) -> str:
 if __name__ == "__main__":
     # Chạy MCP bằng giao thức SSE HTTP để nhận kết nối từ Remote IDE (VS Code) thay vì file local
     print("Khởi chạy SSE MCP Server tại cổng 8001...")
-    mcp.run(transport='sse')
+    # Lắng nghe 0.0.0.0 để tương thích với Docker Port Mapping
+    import uvicorn
+    app = mcp._create_sse_app()
+    uvicorn.run(app, host="0.0.0.0", port=8001)
+
