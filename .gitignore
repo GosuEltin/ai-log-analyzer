@@ -26,3 +26,6 @@ data/logs/*.log
 !data/logs/.gitkeep
 
 Hackathon_ Spec - Digital Worker - Final Round.docx.md
+
+# Logs
+logs/
